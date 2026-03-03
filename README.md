@@ -33,6 +33,8 @@ containers:
 
 Every image must include a SHA256 hash so Tinfoil can verify exactly what code is running inside the confidential VM.
 
+> **Note:** The `hello-world` container doesn't expose a server — it prints a message and exits. You can still access the `/health` endpoint to verify the enclave is running. If you deploy in **debug mode**, you can also SSH into the enclave to inspect the environment directly.
+
 ## Updating Your Container
 
 After the initial deployment, update your container by editing the config directly and pushing a new tag:
