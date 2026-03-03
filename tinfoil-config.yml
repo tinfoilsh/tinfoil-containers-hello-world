@@ -25,9 +25,8 @@ containers:
       - API_KEY
 
 # Shim configuration
-# Maps external port 8080 -> container port 80 (where getting-started serves)
 shim:
-  listen-port: 8080
+  listen-port: 443
   upstream-port: 80
   paths:
-    - /
+    - /*
