@@ -17,8 +17,8 @@ memory: 8192
 # Container configuration
 # Note: image must include SHA256 hash (e.g., image:tag@sha256:abc123...)
 containers:
-  - name: "app"
-    image: "your-image:tag@sha256:..."
+  - name: "hello-world"
+    image: "hello-world:latest@sha256:f4ce9335607b7d0a7576de660ddede10582400f97b5ebe39a2d35a2e3866050d"
     env:
       - LOG_LEVEL: "info"
     secrets:
