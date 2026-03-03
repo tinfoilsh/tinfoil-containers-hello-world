@@ -17,17 +17,17 @@ memory: 8192
 # Container configuration
 # Note: image must include SHA256 hash (e.g., image:tag@sha256:abc123...)
 containers:
-  - name: "hello-world"
-    image: "hello-world:latest@sha256:f4ce9335607b7d0a7576de660ddede10582400f97b5ebe39a2d35a2e3866050d"
+  - name: "getting-started"
+    image: "docker/getting-started:latest@sha256:d79336f4812b6547a53e735480dde67f8f8f7071b414fbd9297609ffb989abc1"
     env:
       - LOG_LEVEL: "info"
     secrets:
       - API_KEY
-    command: ["--port", "8000"]
 
-# Shim configuration (adjust upstream-port and paths to match your container)
+# Shim configuration
+# Maps external port 8080 -> container port 80 (where getting-started serves)
 shim:
-  listen-port: 443
-  upstream-port: 8000
+  listen-port: 8080
+  upstream-port: 80
   paths:
-    - /health
+    - /
