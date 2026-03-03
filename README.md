@@ -1,6 +1,6 @@
 # Tinfoil Containers — Hello World
 
-This repository is a self-contained tutorial for deploying your first container with [Tinfoil](https://tinfoil.sh). It uses the Docker [getting-started](https://hub.docker.com/r/docker/getting-started) image to walk you through the full workflow — from configuration to deployment.
+This repository is a self-contained tutorial for deploying your first container with [Tinfoil](https://tinfoil.sh). It uses [hashicorp/http-echo](https://hub.docker.com/r/hashicorp/http-echo) — a minimal HTTP server that responds with a configurable message — to walk you through the full workflow from configuration to deployment.
 
 ## Quick Start
 
@@ -9,7 +9,7 @@ This repository is a self-contained tutorial for deploying your first container 
 3. Select **Simple Deploy**
 4. Provide:
    - This repository URL
-   - Your container image with SHA hash (e.g., `docker/getting-started:latest@sha256:d79336f4...`)
+   - Your container image with SHA hash (e.g., `hashicorp/http-echo:latest@sha256:fcb75f69...`)
    - Environment variables and secrets
    - Resource requirements (CPUs, memory, GPUs)
 5. Click **Deploy**
@@ -18,21 +18,22 @@ The `tinfoil-config.yml` file will be automatically updated with your settings a
 
 ## What's in tinfoil-config.yml
 
-This repo ships with a working config that deploys the official Docker `getting-started` image, pinned by SHA256 digest for reproducibility:
+This repo ships with a working config that deploys [hashicorp/http-echo](https://hub.docker.com/r/hashicorp/http-echo), pinned by SHA256 digest for reproducibility:
 
 ```yaml
 containers:
-  - name: "getting-started"
-    image: "docker/getting-started:latest@sha256:d79336f4812b6547a53e735480dde67f8f8f7071b414fbd9297609ffb989abc1"
+  - name: "hello-world"
+    image: "hashicorp/http-echo:latest@sha256:fcb75f691c8b0414d670ae570240cbf95502cc18a9ba57e982ecac589760a186"
+    command: ["-listen=:8080", "-text=hello world"]
     env:
       - LOG_LEVEL: "info"
     secrets:
       - API_KEY
 ```
 
-Every image must include a SHA256 hash so Tinfoil can verify exactly what code is running inside the confidential VM.
+The `command` field passes flags to `http-echo`: `-listen=:8080` sets the port, and `-text=hello world` sets the response message. Every image must include a SHA256 hash so Tinfoil can verify exactly what code is running inside the confidential VM.
 
-> **Note:** The `getting-started` container serves a tutorial web app on port 80. Once deployed, you can access it at the root path (`/`). If you deploy in **debug mode**, you can also SSH into the enclave to inspect the environment directly.
+> **Note:** If you deploy in **debug mode**, you can SSH into the enclave to inspect the environment directly.
 
 ## Updating Your Container
 
@@ -57,15 +58,15 @@ Your new deployment will be built from the tagged commit. Each tag creates an au
 **Update container image:**
 ```yaml
 containers:
-  - name: "getting-started"
-    image: "docker/getting-started:latest@sha256:d79336f4812b6547a53e735480dde67f8f8f7071b414fbd9297609ffb989abc1"
+  - name: "hello-world"
+    image: "hashicorp/http-echo:latest@sha256:fcb75f691c8b0414d670ae570240cbf95502cc18a9ba57e982ecac589760a186"
 ```
 To get the SHA hash for an image: `docker pull <image> && docker inspect --format='{{index .RepoDigests 0}}' <image>`
 
 **Add environment variable:**
 ```yaml
 containers:
-  - name: "getting-started"
+  - name: "hello-world"
     env:
       - LOG_LEVEL: "info"      # Hardcoded value
       - MAX_WORKERS: "4"

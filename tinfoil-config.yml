@@ -17,16 +17,18 @@ memory: 8192
 # Container configuration
 # Note: image must include SHA256 hash (e.g., image:tag@sha256:abc123...)
 containers:
-  - name: "getting-started"
-    image: "docker/getting-started:latest@sha256:d79336f4812b6547a53e735480dde67f8f8f7071b414fbd9297609ffb989abc1"
+  - name: "hello-world"
+    image: "hashicorp/http-echo:latest@sha256:fcb75f691c8b0414d670ae570240cbf95502cc18a9ba57e982ecac589760a186"
+    command: ["-listen=:8080", "-text=Hello from a Tinfoil Container!"]
     env:
       - LOG_LEVEL: "info"
     secrets:
       - API_KEY
 
 # Shim configuration
+# Maps external port 443 -> container port 8080 (where http-echo listens)
 shim:
   listen-port: 443
-  upstream-port: 80
+  upstream-port: 8080
   paths:
     - /*
