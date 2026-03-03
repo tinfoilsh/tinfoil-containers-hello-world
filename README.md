@@ -1,181 +1,57 @@
 # Tinfoil Containers — Hello World
 
-This repository is a self-contained tutorial for deploying your first container with [Tinfoil](https://tinfoil.sh). It uses [hashicorp/http-echo](https://hub.docker.com/r/hashicorp/http-echo) — a minimal HTTP server that responds with a configurable message — to walk you through the full workflow from configuration to deployment.
+A minimal example of a [Tinfoil Container](https://docs.tinfoil.sh/containers/overview) deployment. Uses [hashicorp/http-echo](https://hub.docker.com/r/hashicorp/http-echo) — an HTTP server that responds with a fixed message — to demonstrate the full workflow.
 
-## Quick Start
+## Deploy It
 
-1. Go to [dash.tinfoil.sh](https://dash.tinfoil.sh)
-2. Click **Create Container**
-3. Select **Simple Deploy**
-4. Provide:
-   - This repository URL
-   - Your container image with SHA hash (e.g., `hashicorp/http-echo:latest@sha256:fcb75f69...`)
-   - Environment variables and secrets
-   - Resource requirements (CPUs, memory, GPUs)
-5. Click **Deploy**
+1. Fork this repo (or [create your own](https://github.com/tinfoilsh/tinfoil-containers-template) from the template)
+2. Push a Git tag:
+   ```bash
+   git tag v0.0.1
+   git push origin main --tags
+   ```
+3. Go to the [Tinfoil Dashboard](https://dash.tinfoil.sh) → **Containers** → **Deploy**
+4. Select your repo and tag, then click **Deploy Container**
 
-The `tinfoil-config.yml` file will be automatically updated with your settings and an initial deployment will be triggered.
+Once running, your container will respond at `https://<name>.<org>.containers.tinfoil.sh` with "Hello from a Tinfoil Container!"
 
-## What's in tinfoil-config.yml
+## What's Inside
 
-This repo ships with a working config that deploys [hashicorp/http-echo](https://hub.docker.com/r/hashicorp/http-echo), pinned by SHA256 digest for reproducibility:
+`tinfoil-config.yml` defines the deployment — the container image (pinned by SHA256 digest), ports, and exposed paths:
 
 ```yaml
 containers:
   - name: "hello-world"
-    image: "hashicorp/http-echo:latest@sha256:fcb75f691c8b0414d670ae570240cbf95502cc18a9ba57e982ecac589760a186"
-    command: ["-listen=:8080", "-text=hello world"]
-    env:
-      - LOG_LEVEL: "info"
-    secrets:
-      - API_KEY
-```
-
-The `command` field passes flags to `http-echo`: `-listen=:8080` sets the port, and `-text=hello world` sets the response message. Every image must include a SHA256 hash so Tinfoil can verify exactly what code is running inside the confidential VM.
-
-> **Note:** If you deploy in **debug mode**, you can SSH into the enclave to inspect the environment directly.
-
-## Updating Your Container
-
-After the initial deployment, update your container by editing the config directly and pushing a new tag:
-
-```bash
-# 1. Edit tinfoil-config.yml (update image version, env vars, etc.)
-
-# 2. Commit your changes
-git add tinfoil-config.yml
-git commit -m "Update container image"
-
-# 3. Push a new tag to trigger deployment
-git tag v2
-git push origin main --tags
-```
-
-Your new deployment will be built from the tagged commit. Each tag creates an auditable record in the transparency log.
-
-### Common Updates
-
-**Update container image:**
-```yaml
-containers:
-  - name: "hello-world"
-    image: "hashicorp/http-echo:latest@sha256:fcb75f691c8b0414d670ae570240cbf95502cc18a9ba57e982ecac589760a186"
-```
-To get the SHA hash for an image: `docker pull <image> && docker inspect --format='{{index .RepoDigests 0}}' <image>`
-
-**Add environment variable:**
-```yaml
-containers:
-  - name: "hello-world"
-    env:
-      - LOG_LEVEL: "info"      # Hardcoded value
-      - MAX_WORKERS: "4"
-    secrets:
-      - API_KEY               # Looked up from external-config
-```
-
-**Expose new path:**
-```yaml
-shim:
-  paths:
-    - /v1/chat/completions
-    - /v1/embeddings    # Add new endpoint
-    - /health
-```
-
-## Manual Configuration
-
-If you prefer to configure manually, edit `tinfoil-config.yml` directly. See the [configuration reference](https://docs.tinfoil.sh/containers/config) for all available options.
-
-### Example: vLLM Inference Server
-
-Once you're comfortable with the basics, you can swap in a real workload. Here's an example deploying a vLLM inference server:
-
-```yaml
-shim-version: v0.3.12@sha256:b81f2295ae6750d61e94f810ce24077360001b6ec795d13643f3170df29e304d
-cvm-version: 0.6.6
-cpus: 16
-memory: 65536
-
-containers:
-  - name: "inference"
-    image: "vllm/vllm-openai:v0.14.1@sha256:6fc52be4609fc19b09c163be2556976447cc844b8d0d817f19bc9e1f44b48d5a"
-    runtime: nvidia
-    gpus: all
-    ipc: host
-    command: [
-      "--model", "/models/my-model",
-      "--port", "8001"
-    ]
+    image: "hashicorp/http-echo:latest@sha256:fcb75f69..."
+    command: ["-listen=:8080", "-text=Hello from a Tinfoil Container!"]
 
 shim:
   listen-port: 443
-  upstream-port: 8001
+  upstream-port: 8080
   paths:
-    - /v1/chat/completions
-    - /v1/completions
-    - /health
-    - /metrics
+    - /*
 ```
 
-### Configuration Reference
+## Next Steps
 
-#### Top-level Fields
+- Try changing the `-text` value in `tinfoil-config.yml`, push a new tag, and redeploy
+- Deploy a real workload — here's a vLLM inference server as an example:
+  ```yaml
+  containers:
+    - name: "inference"
+      image: "vllm/vllm-openai:v0.14.1@sha256:6fc52be..."
+      runtime: nvidia
+      gpus: all
+      ipc: host
+      command: ["--model", "/models/my-model", "--port", "8001"]
 
-| Field | Description | Valid Values |
-|-------|-------------|--------------|
-| `shim-version` | Version of the Tinfoil shim | Pinned version with SHA |
-| `cvm-version` | Confidential VM version | Version string (e.g., `0.6.6`) |
-| `cpus` | Number of vCPUs | 2, 4, 8, 16, 32 |
-| `memory` | Memory in MB | 8192, 16384, 32768, 65536, 131072 |
-
-#### Container Configuration
-
-Each container in the `containers` array supports:
-
-| Field | Description | Example |
-|-------|-------------|---------|
-| `name` | Container identifier | `"inference"` |
-| `image` | Container image with SHA256 digest | `"image:tag@sha256:..."` |
-| `command` | Command arguments | `["--port", "8001"]` |
-| `entrypoint` | Override entrypoint | `["python"]` |
-| `env` | Environment variables | See below |
-| `secrets` | Secret keys from external-config | `["API_KEY"]` |
-| `runtime` | Container runtime | `"nvidia"` |
-| `gpus` | GPU allocation | `"all"`, `"0,1"`, or count |
-| `ipc` | IPC mode (for multi-GPU) | `"host"` |
-| `volumes` | Bind mounts | `["/mnt/ramdisk/data:/data"]` |
-
-**Environment variables** support two formats:
-```yaml
-env:
-  - LOG_LEVEL: "info"    # Hardcoded value
-  - CONFIG_PATH          # Looked up from external-config env section
-
-secrets:
-  - API_KEY              # Looked up from external-config secrets section
-```
-
-#### Shim Configuration
-
-| Field | Description | Example |
-|-------|-------------|---------|
-| `shim.listen-port` | External port (usually 443) | `443` |
-| `shim.upstream-port` | Port your container listens on | `8000`, `8001` |
-| `shim.paths` | URL paths to expose | `["/health", "/v1/*"]` |
-
-## Security
-
-Your deployment runs in a Confidential Virtual Machine (CVM) with:
-- Hardware-level memory encryption
-- Attestation via Sigstore
-- No access to your data by Tinfoil or cloud providers
-
-**Container images must include a SHA256 hash** (e.g., `image:tag@sha256:...`).
-
-The configuration in this repository is signed and included in the transparency log for auditability.
-
-## Support
-
-- [Documentation](https://docs.tinfoil.sh)
-- [Email Support](mailto:contact@tinfoil.sh)
+  shim:
+    listen-port: 443
+    upstream-port: 8001
+    paths:
+      - /v1/chat/completions
+      - /v1/responses
+      - /health
+  ```
+- Start from the [template repo](https://github.com/tinfoilsh/tinfoil-containers-template) for your own deployments
+- See the [full documentation](https://docs.tinfoil.sh/containers/overview) for configuration options, secrets, debug mode, and more
