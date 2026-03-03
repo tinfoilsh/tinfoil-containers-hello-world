@@ -1,6 +1,6 @@
-# Tinfoil Container Configuration
+# Tinfoil Containers — Hello World
 
-This repository contains the configuration for your Tinfoil Container deployment.
+This repository is a self-contained tutorial for deploying your first container with [Tinfoil](https://tinfoil.sh). It uses the Docker [hello-world](https://hub.docker.com/_/hello-world/) image to walk you through the full workflow — from configuration to deployment.
 
 ## Quick Start
 
@@ -9,12 +9,29 @@ This repository contains the configuration for your Tinfoil Container deployment
 3. Select **Simple Deploy**
 4. Provide:
    - This repository URL
-   - Your container image with SHA hash (e.g., `vllm/vllm-openai:v0.14.1@sha256:abc123...`)
+   - Your container image with SHA hash (e.g., `hello-world:latest@sha256:f4ce9335...`)
    - Environment variables and secrets
    - Resource requirements (CPUs, memory, GPUs)
 5. Click **Deploy**
 
 The `tinfoil-config.yml` file will be automatically updated with your settings and an initial deployment will be triggered.
+
+## What's in tinfoil-config.yml
+
+This repo ships with a working config that deploys the official Docker `hello-world` image, pinned by SHA256 digest for reproducibility:
+
+```yaml
+containers:
+  - name: "hello-world"
+    image: "hello-world:latest@sha256:f4ce9335607b7d0a7576de660ddede10582400f97b5ebe39a2d35a2e3866050d"
+    env:
+      - LOG_LEVEL: "info"
+    secrets:
+      - API_KEY
+    command: ["--port", "8000"]
+```
+
+Every image must include a SHA256 hash so Tinfoil can verify exactly what code is running inside the confidential VM.
 
 ## Updating Your Container
 
@@ -25,7 +42,7 @@ After the initial deployment, update your container by editing the config direct
 
 # 2. Commit your changes
 git add tinfoil-config.yml
-git commit -m "Update to vllm v0.14.1"
+git commit -m "Update container image"
 
 # 3. Push a new tag to trigger deployment
 git tag v2
@@ -39,15 +56,15 @@ Your new deployment will be built from the tagged commit. Each tag creates an au
 **Update container image:**
 ```yaml
 containers:
-  - name: "app"
-    image: "vllm/vllm-openai:v0.14.1@sha256:6fc52be4609fc19b09c163be2556976447cc844b8d0d817f19bc9e1f44b48d5a"
+  - name: "hello-world"
+    image: "hello-world:latest@sha256:f4ce9335607b7d0a7576de660ddede10582400f97b5ebe39a2d35a2e3866050d"
 ```
 To get the SHA hash for an image: `docker pull <image> && docker inspect --format='{{index .RepoDigests 0}}' <image>`
 
 **Add environment variable:**
 ```yaml
 containers:
-  - name: "app"
+  - name: "hello-world"
     env:
       - LOG_LEVEL: "info"      # Hardcoded value
       - MAX_WORKERS: "4"
@@ -69,6 +86,8 @@ shim:
 If you prefer to configure manually, edit `tinfoil-config.yml` directly. See the [configuration reference](https://docs.tinfoil.sh/containers/config) for all available options.
 
 ### Example: vLLM Inference Server
+
+Once you're comfortable with the basics, you can swap in a real workload. Here's an example deploying a vLLM inference server:
 
 ```yaml
 shim-version: v0.3.12@sha256:b81f2295ae6750d61e94f810ce24077360001b6ec795d13643f3170df29e304d
