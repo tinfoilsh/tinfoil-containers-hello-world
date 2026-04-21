@@ -26,7 +26,6 @@ containers:
     command: ["-listen=:8080", "-text=Hello from a Tinfoil Container!"]
 
 shim:
-  listen-port: 443
   upstream-port: 8080
   paths:
     - /*
@@ -46,7 +45,6 @@ shim:
       command: ["--model", "/models/my-model", "--port", "8001"]
 
   shim:
-    listen-port: 443
     upstream-port: 8001
     paths:
       - /v1/chat/completions

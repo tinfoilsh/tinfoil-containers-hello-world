@@ -9,8 +9,7 @@
 #
 # For updates: edit this file, commit, and push a new tag (e.g., v2)
 
-shim-version: v0.4.2@sha256:d65f769e37bbe86ffaeef42120c29c4b9de33415fcd7588a9ef7a64f609aa2a3
-cvm-version: 0.6.9
+cvm-version: 0.7.5
 cpus: 2
 memory: 8192
 
@@ -25,10 +24,8 @@ containers:
     secrets:
       - API_KEY
 
-# Shim configuration
-# Maps external port 443 -> container port 8080 (where http-echo listens)
+# Shim configuration (http-echo listens on 8080, exposed via the default HTTPS port)
 shim:
-  listen-port: 443
   upstream-port: 8080
   paths:
     - /*
