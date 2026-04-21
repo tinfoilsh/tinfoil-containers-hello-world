@@ -13,7 +13,7 @@ A minimal example of a [Tinfoil Container](https://docs.tinfoil.sh/containers/ov
 3. Go to the [Tinfoil Dashboard](https://dash.tinfoil.sh) → **Containers** → **Deploy**
 4. Select your repo and tag, then click **Deploy Container**
 
-Once running, your container will respond at `https://<name>.<org>.containers.tinfoil.sh` with "Hello from a Tinfoil Container!"
+Once running, your container will respond at `https://<name>.<org>.containers.tinfoil.dev` with "Hello from a Tinfoil Container!"
 
 ## What's Inside
 
