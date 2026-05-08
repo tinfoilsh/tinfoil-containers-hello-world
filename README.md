@@ -22,7 +22,7 @@ Once running, your container will respond at `https://<name>.<org>.containers.ti
 ```yaml
 containers:
   - name: "hello-world"
-    image: "hashicorp/http-echo:latest@sha256:fcb75f69..."
+    image: "hashicorp/http-echo@sha256:fcb75f69..."
     command: ["-listen=:8080", "-text=Hello from a Tinfoil Container!"]
 
 shim:
