@@ -17,7 +17,7 @@ memory: 8192
 # Note: image must include SHA256 hash (e.g., image:tag@sha256:abc123...)
 containers:
   - name: "hello-world"
-    image: "hashicorp/http-echo:latest@sha256:fcb75f691c8b0414d670ae570240cbf95502cc18a9ba57e982ecac589760a186"
+    image: "hashicorp/http-echo@sha256:fcb75f691c8b0414d670ae570240cbf95502cc18a9ba57e982ecac589760a186"
     command: ["-listen=:8080", "-text=Hello from a Tinfoil Container!"]
     env:
       - LOG_LEVEL: "info"
