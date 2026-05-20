@@ -33,7 +33,11 @@ shim:
 
 ## Next Steps
 
-- Try changing the `-text` value in `tinfoil-config.yml`, push a new tag, and redeploy
+- Try changing the `-text` value in `tinfoil-config.yml`, commit it, then release a new version by running the **Tinfoil Release** workflow:
+  - **CLI:** `gh workflow run tinfoil-release.yml -f version=v0.0.2`
+  - **UI:** Go to the **Actions** tab → **Tinfoil Release** → **Run workflow**, then enter the version (e.g. `v0.0.2`)
+
+  The workflow tags the release and publishes it; then redeploy from the [Tinfoil Dashboard](https://dash.tinfoil.sh).
 - Deploy a real workload — here's a vLLM inference server as an example:
   ```yaml
   containers:
