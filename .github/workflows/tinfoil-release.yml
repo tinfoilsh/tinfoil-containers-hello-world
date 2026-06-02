@@ -26,7 +26,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read  # checkout + check the tag does not exist
+      contents: read # checkout + check the tag does not exist
       packages: write # push the container image
     outputs:
       digest: ${{ steps.build.outputs.digest }}
