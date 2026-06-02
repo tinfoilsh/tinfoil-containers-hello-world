@@ -1,59 +1,37 @@
 # Tinfoil Containers — Hello World
 
-A minimal example of a [Tinfoil Container](https://docs.tinfoil.sh/containers/overview) deployment. Uses [hashicorp/http-echo](https://hub.docker.com/r/hashicorp/http-echo) — an HTTP server that responds with a fixed message — to demonstrate the full workflow.
+A minimal example of a [Tinfoil Container](https://docs.tinfoil.sh/containers/overview) Image: a tiny Go HTTP server, built and published as a Docker image from this repo. Deployed in a [secure enclave](https://github.com/tinfoilsh/tinfoil-public-containers-template)
 
-## Deploy It
+The server reads a `MESSAGE` environment variable and a `GREETING_TOKEN` secret, and responds on every path with:
 
-1. Fork this repo (or [create your own](https://github.com/tinfoilsh/tinfoil-containers-template) from the template)
-2. Push a Git tag:
-   ```bash
-   git tag v0.0.1
-   git push origin main --tags
-   ```
-3. Go to the [Tinfoil Dashboard](https://dash.tinfoil.sh) → **Containers** → **Deploy**
-4. Select your repo and tag, then click **Deploy Container**
+```
+MESSAGE: Hello from a Tinfoil Container!
+GREETING_TOKEN: present
+```
 
-Once running, your container will respond at `https://<name>.<org>.containers.tinfoil.dev` with "Hello from a Tinfoil Container!"
+## Build off of this
+
+1. Click **[Use this template](https://github.com/tinfoilsh/tinfoil-containers-hello-world/generate)** → **Create a new repository**
+2. Release a version by running the **Tinfoil Release** workflow — this builds the image, pushes it to GHCR, updates `tinfoil-config.yml` with the new digest, and tags the release:
+   - **CLI:** `gh workflow run tinfoil-release.yml -f version=v0.0.1`
+   - **UI:** **Actions** tab → **Tinfoil Release** → **Run workflow**, then enter the version
+3. In the [Tinfoil Dashboard](https://dash.tinfoil.sh), open the **Secrets** tab and add `GREETING_TOKEN` with any value
+4. **Containers** → **Deploy**, select your repo and tag, and click **Deploy**
+
+Once running, `curl https://<name>.<org>.containers.tinfoil.dev` returns the two-line response above. If you skip step 3, `GREETING_TOKEN` shows `absent` — confirming that secrets only reach the container when you wire them up.
 
 ## What's Inside
 
-`tinfoil-config.yml` defines the deployment — the container image (pinned by SHA256 digest), ports, and exposed paths:
+- **`main.go`** — ~20-line `net/http` server. No dependencies.
+- **`Dockerfile`** — multi-stage `golang:1.23-alpine` → `scratch`, ~5 MB final image.
+- **`tinfoil-config.yml`** — declares the image, the `MESSAGE` env var, and the `GREETING_TOKEN` secret. The image digest is a placeholder; the release workflow substitutes the real one.
+- **`.github/workflows/`** — two-phase release:
+  - `tinfoil-release.yml` (manual dispatch) builds the image, calls [`update-container-action`](https://github.com/tinfoilsh/update-container-action) to write the digest into the config, creates the tag, and dispatches phase 2
+  - `tinfoil-release-publish.yml` (auto-triggered on the new tag) measures the image, signs the attestation, and publishes the GitHub release
 
-```yaml
-containers:
-  - name: "hello-world"
-    image: "hashicorp/http-echo@sha256:fcb75f69..."
-    command: ["-listen=:8080", "-text=Hello from a Tinfoil Container!"]
-
-shim:
-  upstream-port: 8080
-  paths:
-    - /*
-```
+Then click **Update** in the dashboard.
 
 ## Next Steps
 
-- Try changing the `-text` value in `tinfoil-config.yml`, commit it, then release a new version by running the **Tinfoil Release** workflow:
-  - **CLI:** `gh workflow run tinfoil-release.yml -f version=v0.0.2`
-  - **UI:** Go to the **Actions** tab → **Tinfoil Release** → **Run workflow**, then enter the version (e.g. `v0.0.2`)
-
-  The workflow tags the release and publishes it; then redeploy from the [Tinfoil Dashboard](https://dash.tinfoil.sh).
-- Deploy a real workload — here's a vLLM inference server as an example:
-  ```yaml
-  containers:
-    - name: "inference"
-      image: "vllm/vllm-openai:v0.14.1@sha256:6fc52be..."
-      runtime: nvidia
-      gpus: all
-      ipc: host
-      command: ["--model", "/models/my-model", "--port", "8001"]
-
-  shim:
-    upstream-port: 8001
-    paths:
-      - /v1/chat/completions
-      - /v1/responses
-      - /health
-  ```
-- Start from the [template repo](https://github.com/tinfoilsh/tinfoil-containers-template) for your own deployments
-- See the [full documentation](https://docs.tinfoil.sh/containers/overview) for configuration options, secrets, debug mode, and more
+- Want a config-only template (pre-built image, no Dockerfile)? See [`tinfoil-containers-template`](https://github.com/tinfoilsh/tinfoil-containers-template).
+- See the [full documentation](https://docs.tinfoil.sh/containers/overview) for configuration options, debug mode, custom domains, and more.
