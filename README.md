@@ -1,5 +1,7 @@
 # Tinfoil Containers — Hello World
 
+> **Moved:** The current source and build workflow are maintained in [tinfoilsh/examples](https://github.com/tinfoilsh/examples/tree/main/tinfoil-containers-hello-world). This repository remains available for existing links, historical measured releases, and existing image references. Do not replace deployment or attestation repository identities with the examples directory URL.
+
 A minimal Docker image to play with [Tinfoil Containers](https://docs.tinfoil.sh/containers/overview): a tiny Go HTTP server, built and published from this repo. To deploy it inside a [secure enclave](https://docs.tinfoil.sh/containers/overview), use [`tinfoil-containers-template`](https://github.com/tinfoilsh/tinfoil-containers-template).
 
 The server reads a `MESSAGE` env var and a `GREETING_TOKEN` secret, and responds on every path with:
@@ -13,12 +15,7 @@ GREETING_TOKEN: present
 
 ## Build off of this
 
-1. Click **[Use this template](https://github.com/tinfoilsh/tinfoil-containers-hello-world/generate)**
-2. Edit `main.go` (or swap it for your own code), then release a version by running the **Tinfoil Release** workflow — this builds your image and pushes it to GHCR:
-   ```bash
-   gh workflow run tinfoil-release.yml -f version=v0.0.1
-   ```
-3. Reference `ghcr.io/<your-org>/<your-repo>` from a [`tinfoil-containers-template`](https://github.com/tinfoilsh/tinfoil-containers-template) repo to deploy it
+Follow the [current build-and-publish instructions](https://github.com/tinfoilsh/examples/tree/main/tinfoil-containers-hello-world#build-off-of-this) in the examples repository. The deployment configuration still lives in a separate [`tinfoil-containers-template`](https://github.com/tinfoilsh/tinfoil-containers-template) repository.
 
 ## What's Inside
 
